@@ -1,0 +1,93 @@
+-- Create Tables
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY AUTO_INCREMENT,
+    ProductName VARCHAR(100),
+    Category VARCHAR(50),
+    Price DECIMAL(10, 2),
+    Rating DECIMAL(3, 2),
+    Inventory INT
+);
+
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY AUTO_INCREMENT,
+    UserName VARCHAR(100),
+    Email VARCHAR(100) UNIQUE,
+    PasswordHash VARCHAR(255)
+);
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID INT,
+    OrderDate DATE,
+    TotalAmount DECIMAL(10, 2),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Reviews (
+    ReviewID INT PRIMARY KEY AUTO_INCREMENT,
+    ProductID INT,
+    UserID INT,
+    Rating DECIMAL(3, 2),
+    Comment TEXT,
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Cart (
+    CartID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID INT,
+    ProductID INT,
+    Quantity INT,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+-- Insert Sample Data
+INSERT INTO Products (ProductName, Category, Price, Rating, Inventory) VALUES
+('Laptop', 'Electronics', 799.99, 4.5, 10),
+('Phone', 'Electronics', 499.99, 4.2, 20),
+('Shoes', 'Fashion', 89.99, 4.0, 30);
+
+INSERT INTO Users (UserName, Email, PasswordHash) VALUES
+('John Doe', 'john@example.com', 'hashedpassword1'),
+('Jane Smith', 'jane@example.com', 'hashedpassword2');
+
+INSERT INTO Orders (UserID, OrderDate, TotalAmount) VALUES
+(1, '2024-08-29', 1299.98),
+(2, '2024-08-30', 89.99);
+
+-- Query Tasks
+-- Select All Products in a Specific Category
+SELECT * FROM Products WHERE Category = 'Electronics';
+
+-- Update Product Inventory After an Order is Placed
+UPDATE Products
+SET Inventory = Inventory - 1
+WHERE ProductID = ?;  -- Replace ? with the ProductID being updated
+
+-- Delete Items from the Cart After an Order is Confirmed
+DELETE FROM Cart
+WHERE UserID = ?;  -- Replace ? with the UserID whose cart is being cleared
+
+-- Filter Orders by User or Order Date
+SELECT * FROM Orders
+WHERE UserID = ?  -- Replace ? with the UserID
+OR OrderDate = ?;  -- Replace ? with the OrderDate
+
+-- Use AND/OR to Filter Products by Rating and Price Range
+SELECT * FROM Products
+WHERE Rating >= ? AND Price BETWEEN ? AND ?;  -- Replace ? with Rating, Min Price, Max Price
+
+-- Sort Products by Rating or Price
+SELECT * FROM Products
+ORDER BY Rating DESC;  -- Or use 'Price ASC/DESC'
+
+-- Count the Total Number of Orders Placed by Each User
+SELECT UserID, COUNT(*) AS OrderCount
+FROM Orders
+GROUP BY UserID;
+
+-- Group Reviews by Product and Calculate the Average Rating
+SELECT ProductID, AVG(Rating) AS AverageRating
+FROM Reviews
+GROUP BY ProductID;
